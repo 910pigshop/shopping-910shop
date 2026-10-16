@@ -358,7 +358,7 @@
 
                             <div class="flex justify-end gap-2 pt-1">
                                 <button type="button" onclick="window.generateVariantMatrix()" class="w-full bg-[#A85568] hover:bg-[#8E4455] text-white py-1.5 rounded-lg text-xs font-bold transition shadow-sm cursor-pointer flex items-center justify-center gap-1">
-                                    <i class="fa-solid fa-bolt"></i> 批量交叉生成規格列
+                                    <i class="fa-solid fa-plus-circle"></i> 追加生成規格至下方
                                 </button>
                             </div>
                         </div>
@@ -368,7 +368,7 @@
                     <div class="flex justify-between items-center pt-1">
                         <label class="block text-xs font-bold text-stone-800">款式/規格選項與庫存明細</label>
                         <div class="flex gap-1.5">
-                            <button type="button" onclick="document.getElementById('variant-input-list').innerHTML=''" class="text-xs bg-stone-100 text-stone-600 hover:bg-stone-200 px-2 py-1 rounded-lg font-bold transition cursor-pointer">清空規格</button>
+                            <button type="button" onclick="document.getElementById('variant-input-list').innerHTML=''" class="text-xs bg-stone-100 text-stone-600 hover:bg-stone-200 px-2 py-1 rounded-lg font-bold transition cursor-pointer">清空所有規格</button>
                             <button type="button" onclick="addVariantRow()" class="text-xs bg-[#FAF2F3] text-[#A85568] border border-rose-100 px-2.5 py-1 rounded-lg font-bold hover:bg-rose-100 transition cursor-pointer">+ 單筆新增</button>
                         </div>
                     </div>
@@ -1126,7 +1126,7 @@
                 '<div class="flex gap-1">' + pageBtnsHtml + '</div>';
         }
 
-        /* --- 交叉矩陣多規格生成器邏輯 --- */
+        /* --- 交叉矩陣多規格生成器邏輯（直接追加模式） --- */
         window.generateVariantMatrix = function() {
             const opt1Raw = document.getElementById('matrix-opt1').value.trim();
             const opt2Raw = document.getElementById('matrix-opt2').value.trim();
@@ -1161,15 +1161,7 @@
 
             if (generatedCombinations.length === 0) return;
 
-            const container = document.getElementById('variant-input-list');
-            if (container.children.length > 0) {
-                if (!confirm(`系統即將生成 ${generatedCombinations.length} 個規格，是否要覆蓋目前現有的規格清單？`)) {
-                    return;
-                }
-            }
-
-            // 清空舊規格，填入新組合
-            container.innerHTML = '';
+            // 【重點修正】：直接將生成的規格追加 (Append) 至下方清單，不清空既有內容
             generatedCombinations.forEach(name => {
                 addVariantRow({
                     name: name,
@@ -1179,11 +1171,11 @@
                 });
             });
 
-            // 清空生成器輸入框
+            // 清空生成器輸入框，方便進行下一輪操作
             document.getElementById('matrix-opt1').value = '';
             document.getElementById('matrix-opt2').value = '';
 
-            alert(`成功生成 ${generatedCombinations.length} 個規格！`);
+            alert(`成功追加 ${generatedCombinations.length} 個規格至清單下方！`);
         };
 
         window.addVariantRow = function(v) {

@@ -17,7 +17,8 @@
             <h1 class="text-xl font-bold tracking-wider flex items-center gap-2">
                 <i class="fa-solid fa-lock"></i> <span>商店管理者控制台</span>
             </h1>
-            <a href="index.html" target="_blank" class="text-xs bg-indigo-700 hover:bg-indigo-600 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5">
+            <!-- 已修正：替換為前台正式 Vercel 網址 -->
+            <a href="https://910onlinshop.vercel.app/" target="_blank" class="text-xs bg-indigo-700 hover:bg-indigo-600 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 font-medium cursor-pointer">
                 <i class="fa-solid fa-external-link"></i> 前往預覽前台
             </a>
         </div>
@@ -34,7 +35,7 @@
                     <label class="block text-sm font-medium text-slate-600 mb-1">管理者密碼</label>
                     <input type="password" id="admin-pwd-input" required class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="預設密碼: admin123">
                 </div>
-                <button type="submit" class="w-full bg-indigo-600 text-white py-2.5 rounded-xl font-medium hover:bg-indigo-700 transition">登入後台</button>
+                <button type="submit" class="w-full bg-indigo-600 text-white py-2.5 rounded-xl font-medium hover:bg-indigo-700 transition cursor-pointer">登入後台</button>
             </form>
         </div>
 
@@ -42,16 +43,16 @@
         <div id="admin-dashboard" class="hidden space-y-6">
             <div class="flex justify-between items-center border-b pb-4">
                 <h2 class="text-2xl font-bold text-slate-900"><i class="fa-solid fa-gauge-high text-indigo-600"></i> 管理選單</h2>
-                <button id="admin-logout-btn" class="text-sm bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg hover:bg-slate-300 transition">登出</button>
+                <button id="admin-logout-btn" class="text-sm bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg hover:bg-slate-300 transition cursor-pointer">登出</button>
             </div>
 
             <!-- 後台導覽分頁頁籤 -->
             <div class="flex gap-2 border-b overflow-x-auto">
-                <button onclick="switchAdminTab('orders')" id="admin-tab-orders" class="px-4 py-2 font-semibold text-indigo-600 border-b-2 border-indigo-600 whitespace-nowrap">處理中訂單 (集運)</button>
-                <button onclick="switchAdminTab('completed')" id="admin-tab-completed" class="px-4 py-2 font-semibold text-slate-500 hover:text-indigo-600 whitespace-nowrap">已接單/完成歷史</button>
-                <button onclick="switchAdminTab('products')" id="admin-tab-products" class="px-4 py-2 font-semibold text-slate-500 hover:text-indigo-600 whitespace-nowrap">商品與多規格庫存</button>
-                <button onclick="switchAdminTab('categories')" id="admin-tab-categories" class="px-4 py-2 font-semibold text-slate-500 hover:text-indigo-600 whitespace-nowrap">商品分類管理</button>
-                <button onclick="switchAdminTab('settings')" id="admin-tab-settings" class="px-4 py-2 font-semibold text-slate-500 hover:text-indigo-600 whitespace-nowrap">商店與匯率設定</button>
+                <button onclick="switchAdminTab('orders')" id="admin-tab-orders" class="px-4 py-2 font-semibold text-indigo-600 border-b-2 border-indigo-600 whitespace-nowrap cursor-pointer">處理中訂單 (集運)</button>
+                <button onclick="switchAdminTab('completed')" id="admin-tab-completed" class="px-4 py-2 font-semibold text-slate-500 hover:text-indigo-600 whitespace-nowrap cursor-pointer">已接單/完成歷史</button>
+                <button onclick="switchAdminTab('products')" id="admin-tab-products" class="px-4 py-2 font-semibold text-slate-500 hover:text-indigo-600 whitespace-nowrap cursor-pointer">商品與多規格庫存</button>
+                <button onclick="switchAdminTab('categories')" id="admin-tab-categories" class="px-4 py-2 font-semibold text-slate-500 hover:text-indigo-600 whitespace-nowrap cursor-pointer">商品分類管理</button>
+                <button onclick="switchAdminTab('settings')" id="admin-tab-settings" class="px-4 py-2 font-semibold text-slate-500 hover:text-indigo-600 whitespace-nowrap cursor-pointer">商店與匯率設定</button>
             </div>
 
             <!-- 區塊 A：處理中訂單管理 -->
@@ -70,7 +71,7 @@
                                 <option value="請至賣貨便下單">請至賣貨便下單</option>
                             </select>
                         </div>
-                        <button onclick="exportOrdersToCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-sm">
+                        <button onclick="exportOrdersToCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-sm cursor-pointer">
                             <i class="fa-solid fa-file-excel"></i> 匯出財務試算表 (CSV)
                         </button>
                     </div>
@@ -89,7 +90,7 @@
                                 <option value="已確認付款">變更為：已確認付款</option>
                                 <option value="訂單已完成">變更為：訂單已完成 (移至已完成區)</option>
                             </select>
-                            <button onclick="batchUpdateOrderStatus()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap shadow-sm">
+                            <button onclick="batchUpdateOrderStatus()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap shadow-sm cursor-pointer">
                                 批次更新
                             </button>
                         </div>
@@ -100,7 +101,7 @@
                     <table class="w-full text-left border-collapse text-sm">
                         <thead>
                             <tr class="bg-slate-100 text-slate-600 border-b">
-                                <th class="p-3 w-10 text-center"><input type="checkbox" id="select-all-orders" onclick="toggleSelectAllOrders(this)" class="rounded"></th>
+                                <th class="p-3 w-10 text-center"><input type="checkbox" id="select-all-orders" onclick="toggleSelectAllOrders(this)" class="rounded cursor-pointer"></th>
                                 <th class="p-3">訂單編號 / 時間</th>
                                 <th class="p-3">購買明細</th>
                                 <th class="p-3">賣出金額</th>
@@ -150,7 +151,7 @@
             <div id="admin-section-products" class="hidden space-y-6">
                 <div class="flex justify-between items-center">
                     <h3 class="text-lg font-bold text-slate-800">商品規格與獨立庫存維護</h3>
-                    <button onclick="openProductModal()" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-indigo-700 transition">
+                    <button onclick="openProductModal()" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-indigo-700 transition cursor-pointer">
                         <i class="fa-solid fa-plus"></i> 新增商品
                     </button>
                 </div>
@@ -180,7 +181,7 @@
                             <label class="block text-sm font-medium text-slate-600 mb-1">分類名稱</label>
                             <input type="text" id="new-category-name" placeholder="例如: 無印良品、百元店" required class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                         </div>
-                        <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-indigo-700 transition">新增分類</button>
+                        <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-indigo-700 transition cursor-pointer">新增分類</button>
                     </form>
                     <div class="bg-white p-6 rounded-2xl shadow border space-y-4">
                         <h4 class="font-bold text-sm text-slate-700">現有分類列表</h4>
@@ -208,13 +209,13 @@
                                 <h4 class="font-bold text-sm text-slate-800"><i class="fa-solid fa-building-columns text-indigo-600"></i> 收款銀行帳號設定 (可提供多組)</h4>
                                 <p class="text-xs text-slate-500">僅需填寫「銀行名稱與代號」與「匯款帳號」即可。</p>
                             </div>
-                            <button type="button" onclick="addBankAccountRow()" class="text-xs bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-lg font-bold hover:bg-indigo-100 transition">+ 新增帳號</button>
+                            <button type="button" onclick="addBankAccountRow()" class="text-xs bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-lg font-bold hover:bg-indigo-100 transition cursor-pointer">+ 新增帳號</button>
                         </div>
 
                         <div id="bank-accounts-input-list" class="space-y-3"></div>
                     </div>
 
-                    <button type="submit" class="w-full bg-indigo-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-indigo-700 transition">儲存商店設定</button>
+                    <button type="submit" class="w-full bg-indigo-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-indigo-700 transition cursor-pointer">儲存商店設定</button>
                 </form>
             </div>
         </div>
@@ -253,14 +254,14 @@
                 <div class="border-t pt-3 space-y-3">
                     <div class="flex justify-between items-center">
                         <label class="block text-sm font-bold text-slate-800">款式/規格選項與庫存</label>
-                        <button type="button" onclick="addVariantRow()" class="text-xs bg-indigo-50 text-indigo-600 px-2.5 py-1 rounded-lg font-bold hover:bg-indigo-100">+ 新增規格</button>
+                        <button type="button" onclick="addVariantRow()" class="text-xs bg-indigo-50 text-indigo-600 px-2.5 py-1 rounded-lg font-bold hover:bg-indigo-100 cursor-pointer">+ 新增規格</button>
                     </div>
                     <div id="variant-input-list" class="space-y-3"></div>
                 </div>
 
                 <div class="flex justify-end gap-2 pt-2 border-t">
-                    <button type="button" onclick="closeProductModal()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200">取消</button>
-                    <button type="submit" id="save-product-btn" class="px-5 py-2 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 flex items-center gap-2">
+                    <button type="button" onclick="closeProductModal()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 cursor-pointer">取消</button>
+                    <button type="submit" id="save-product-btn" class="px-5 py-2 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 flex items-center gap-2 cursor-pointer">
                         <span>儲存商品</span>
                     </button>
                 </div>
@@ -292,7 +293,7 @@
         let categories = [];
         let ordersCache = [];
         let currentFilterStatus = 'ALL';
-        let currentExistingImages = []; // 編輯時暫存的既有圖片網址陣列
+        let currentExistingImages = [];
 
         const PAGE_SIZE = 30;
         let activeOrdersPage = 1;
@@ -377,10 +378,10 @@
         window.switchAdminTab = function(tab) {
             ['orders', 'completed', 'products', 'categories', 'settings'].forEach(t => {
                 document.getElementById('admin-section-' + t).classList.add('hidden');
-                document.getElementById('admin-tab-' + t).className = "px-4 py-2 font-semibold text-slate-500 hover:text-indigo-600 whitespace-nowrap";
+                document.getElementById('admin-tab-' + t).className = "px-4 py-2 font-semibold text-slate-500 hover:text-indigo-600 whitespace-nowrap cursor-pointer";
             });
             document.getElementById('admin-section-' + tab).classList.remove('hidden');
-            document.getElementById('admin-tab-' + tab).className = "px-4 py-2 font-semibold text-indigo-600 border-b-2 border-indigo-600 whitespace-nowrap";
+            document.getElementById('admin-tab-' + tab).className = "px-4 py-2 font-semibold text-indigo-600 border-b-2 border-indigo-600 whitespace-nowrap cursor-pointer";
         };
 
         window.filterOrdersByStatus = function() {
@@ -457,7 +458,7 @@
                 if (o.status === '訂單已完成' || o.status === '已完成購買') statusBadgeClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
 
                 return '<tr class="border-b hover:bg-slate-50">' +
-                    (isActiveMode ? '<td class="p-3 text-center"><input type="checkbox" value="' + o.id + '" class="order-checkbox rounded"></td>' : '') +
+                    (isActiveMode ? '<td class="p-3 text-center"><input type="checkbox" value="' + o.id + '" class="order-checkbox rounded cursor-pointer"></td>' : '') +
                     '<td class="p-3">' +
                         '<div class="font-bold text-indigo-600">' + o.orderNo + '</div>' +
                         '<div class="text-xs text-slate-400">' + new Date(o.createdAt).toLocaleString() + '</div>' +
@@ -483,7 +484,7 @@
                         '<div class="flex items-center gap-1.5">' +
                             '<input type="number" step="0.01" id="weight-' + o.id + '" value="' + (o.weight !== undefined ? o.weight : '') + '" placeholder="0.00" class="w-16 px-2 py-1 text-xs border rounded focus:ring-1 focus:ring-indigo-500 focus:outline-none">' +
                             '<span class="text-xs text-slate-500">kg</span>' +
-                            '<button onclick="window.updateOrderWeight(\'' + o.id + '\')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-1 rounded text-xs">儲存</button>' +
+                            '<button onclick="window.updateOrderWeight(\'' + o.id + '\')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-1 rounded text-xs cursor-pointer">儲存</button>' +
                         '</div>' +
                     '</td>' +
                     '<td class="p-3">' +
@@ -498,7 +499,7 @@
                         '</select>' +
                     '</td>' +
                     '<td class="p-3 text-center">' +
-                        '<button onclick="window.deleteOrder(\'' + o.id + '\', \'' + o.orderNo + '\')" class="text-rose-500 hover:text-rose-700 p-1.5 rounded-lg hover:bg-rose-50 transition" title="刪除訂單">' +
+                        '<button onclick="window.deleteOrder(\'' + o.id + '\', \'' + o.orderNo + '\')" class="text-rose-500 hover:text-rose-700 p-1.5 rounded-lg hover:bg-rose-50 transition cursor-pointer" title="刪除訂單">' +
                             '<i class="fa-solid fa-trash-can"></i>' +
                         '</button>' +
                     '</td>' +
@@ -508,7 +509,7 @@
             let pageBtnsHtml = '';
             for (let i = 1; i <= totalPages; i++) {
                 const isActive = i === currentPage;
-                pageBtnsHtml += '<button onclick="window.changeOrderPage(\'' + tbodyId + '\', ' + i + ')" class="px-3 py-1 text-xs rounded-lg font-bold border transition ' + (isActive ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 hover:bg-slate-50') + '">' + i + '</button>';
+                pageBtnsHtml += '<button onclick="window.changeOrderPage(\'' + tbodyId + '\', ' + i + ')" class="px-3 py-1 text-xs rounded-lg font-bold border transition cursor-pointer ' + (isActive ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 hover:bg-slate-50') + '">' + i + '</button>';
             }
 
             paginationContainer.innerHTML = 
@@ -646,7 +647,7 @@
             c3.className = "col-span-1 text-center";
             const btn = document.createElement('button');
             btn.type = "button";
-            btn.className = "text-rose-500 hover:text-rose-700 text-xs p-1";
+            btn.className = "text-rose-500 hover:text-rose-700 text-xs p-1 cursor-pointer";
             btn.innerHTML = '<i class="fa-solid fa-trash"></i>';
             btn.onclick = function() { div.remove(); };
             c3.appendChild(btn);
@@ -718,7 +719,7 @@
             list.innerHTML = categories.map(c => 
                 '<div class="py-2 flex justify-between items-center text-sm">' +
                     '<span class="font-medium text-slate-700">' + c.name + '</span>' +
-                    '<button onclick="window.deleteCategory(\'' + c.id + '\')" class="text-rose-500 hover:text-rose-700 text-xs font-bold">刪除</button>' +
+                    '<button onclick="window.deleteCategory(\'' + c.id + '\')" class="text-rose-500 hover:text-rose-700 text-xs font-bold cursor-pointer">刪除</button>' +
                 '</div>'
             ).join('');
         }
@@ -755,8 +756,8 @@
                         '</div>' +
                     '</td>' +
                     '<td class="p-3 text-center space-x-2">' +
-                        '<button onclick="window.openProductModal(\'' + p.id + '\')" class="text-indigo-600 hover:text-indigo-800 text-xs font-bold">編輯</button>' +
-                        '<button onclick="window.deleteProduct(\'' + p.id + '\')" class="text-rose-500 hover:text-rose-700 text-xs font-bold">刪除</button>' +
+                        '<button onclick="window.openProductModal(\'' + p.id + '\')" class="text-indigo-600 hover:text-indigo-800 text-xs font-bold cursor-pointer">編輯</button>' +
+                        '<button onclick="window.deleteProduct(\'' + p.id + '\')" class="text-rose-500 hover:text-rose-700 text-xs font-bold cursor-pointer">刪除</button>' +
                     '</td>' +
                 '</tr>';
             }).join('');
@@ -812,7 +813,7 @@
             c5.className = "col-span-1 text-center";
             const btn = document.createElement('button');
             btn.type = "button";
-            btn.className = "text-rose-500 hover:text-rose-700 text-xs";
+            btn.className = "text-rose-500 hover:text-rose-700 text-xs cursor-pointer";
             btn.innerHTML = '<i class="fa-solid fa-trash"></i>';
             btn.onclick = function() { div.remove(); };
             c5.appendChild(btn);
@@ -843,7 +844,7 @@
             previewContainer.innerHTML = currentExistingImages.map((img, idx) => 
                 '<div class="relative w-16 h-16 rounded-xl overflow-hidden border group bg-slate-100">' +
                     '<img src="' + img + '" class="w-full h-full object-cover">' +
-                    '<button type="button" onclick="window.removeExistingImage(' + idx + ')" class="absolute top-0.5 right-0.5 bg-rose-600 text-white w-5 h-5 rounded-full text-[10px] flex items-center justify-center shadow hover:bg-rose-700 transition" title="刪除此圖片">&times;</button>' +
+                    '<button type="button" onclick="window.removeExistingImage(' + idx + ')" class="absolute top-0.5 right-0.5 bg-rose-600 text-white w-5 h-5 rounded-full text-[10px] flex items-center justify-center shadow hover:bg-rose-700 transition cursor-pointer" title="刪除此圖片">&times;</button>' +
                 '</div>'
             ).join('');
         }
@@ -883,7 +884,6 @@
             document.getElementById('product-modal').classList.add('hidden');
         };
 
-        // 儲存商品（上傳圖片至 Firebase Storage）
         document.getElementById('product-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             const saveBtn = document.getElementById('save-product-btn');
@@ -900,7 +900,6 @@
             let uploadedUrls = [...currentExistingImages];
 
             try {
-                // 上傳新選擇的檔案至 Firebase Storage
                 if (files && files.length > 0) {
                     for (let i = 0; i < files.length; i++) {
                         const file = files[i];

@@ -17,7 +17,6 @@
             <h1 class="text-xl font-bold tracking-wider flex items-center gap-2">
                 <i class="fa-solid fa-lock"></i> <span>商店管理者控制台</span>
             </h1>
-            <!-- 已修正：替換為前台正式 Vercel 網址 -->
             <a href="https://910onlinshop.vercel.app/" target="_blank" class="text-xs bg-indigo-700 hover:bg-indigo-600 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 font-medium cursor-pointer">
                 <i class="fa-solid fa-external-link"></i> 前往預覽前台
             </a>
@@ -221,7 +220,7 @@
         </div>
     </main>
 
-    <!-- 商品編輯 Modal (直接選擇檔案上傳 Firebase Storage) -->
+    <!-- 商品編輯 Modal (Google Drive 網址連動) -->
     <div id="product-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <h3 id="product-modal-title" class="font-bold text-lg text-slate-900">新增商品與規格</h3>
@@ -238,16 +237,20 @@
                     </select>
                 </div>
 
-                <!-- Firebase Storage 圖片上傳區塊 -->
+                <!-- Google Drive 圖片連結輸入區塊 -->
                 <div class="border-t pt-3 space-y-3">
-                    <label class="block text-sm font-bold text-slate-800"><i class="fa-solid fa-cloud-arrow-up text-indigo-600"></i> 上傳商品照片 (Firebase 雲端儲存)</label>
+                    <label class="block text-sm font-bold text-slate-800"><i class="fa-brands fa-google-drive text-emerald-600"></i> Google Drive 照片連結 (免綁卡方案)</label>
                     
-                    <!-- 現有已上傳圖片縮圖預覽 -->
+                    <!-- 現有已新增圖片預覽 -->
                     <div id="existing-images-preview" class="flex flex-wrap gap-2 hidden"></div>
 
-                    <div>
-                        <label class="block text-xs text-slate-500 mb-1">選擇電腦或手機照片（可一次選多張）：</label>
-                        <input type="file" id="prod-images-file" accept="image/*" multiple class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer border rounded-xl p-1">
+                    <div class="space-y-1.5 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <label class="block text-xs font-bold text-slate-700">貼上 Google Drive 分享網址（多張請用逗號隔開或換行）：</label>
+                        <textarea id="prod-drive-urls" rows="3" placeholder="請將照片設為「知道連結的人皆可存取」，貼上如：&#10;https://drive.google.com/file/d/12345/view?usp=sharing" class="w-full px-3 py-2 text-xs border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white font-mono"></textarea>
+                        <div class="text-[11px] text-slate-500 flex items-center gap-1">
+                            <i class="fa-solid fa-lightbulb text-amber-500"></i>
+                            <span>提示：系統會自動將網址轉換為可以直接顯示的高畫質圖片網址！</span>
+                        </div>
                     </div>
                 </div>
 
@@ -273,7 +276,6 @@
     <script type="module">
         import * as FirebaseApp from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import * as Firestore from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import * as Storage from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBprY_kKxxx7pPC_7yeyoJw8yacMnpVwMs",
@@ -287,7 +289,6 @@
 
         const app = FirebaseApp.initializeApp(firebaseConfig);
         const db = Firestore.getFirestore(app);
-        const storage = Storage.getStorage(app);
 
         let products = [];
         let categories = [];
@@ -301,6 +302,26 @@
 
         let bankSettings = { accounts: [{ name: "中國信託 (822)", account: "1234-5678-9012" }], jpyRate: 0.22 };
         const FALLBACK_IMAGE = "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='18' height='18' x='3' y='3' rx='2' ry='2'/%3E%3Ccircle cx='9' cy='9' r='2'/%3E%3Cpath d='m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21'/%3E%3C/svg%3E";
+
+        // Google Drive 網址自動轉換工具
+        function convertDriveUrl(url) {
+            url = url.trim();
+            if (!url) return '';
+            // 如果已經是直接圖片網址或非 Drive 網址，直接返回
+            if (!url.includes('drive.google.com')) return url;
+
+            let fileId = '';
+            const match1 = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+            const match2 = url.match(/id=([a-zA-Z0-9_-]+)/);
+
+            if (match1 && match1[1]) fileId = match1[1];
+            else if (match2 && match2[1]) fileId = match2[1];
+
+            if (fileId) {
+                return 'https://lh3.googleusercontent.com/d/' + fileId;
+            }
+            return url;
+        }
 
         Firestore.onSnapshot(Firestore.collection(db, "categories"), (snapshot) => {
             categories = [];
@@ -852,7 +873,7 @@
         window.openProductModal = function(id) {
             document.getElementById('product-modal').classList.remove('hidden');
             document.getElementById('variant-input-list').innerHTML = '';
-            document.getElementById('prod-images-file').value = '';
+            document.getElementById('prod-drive-urls').value = '';
             updateProductCategorySelect();
 
             if (id) {
@@ -888,30 +909,21 @@
             e.preventDefault();
             const saveBtn = document.getElementById('save-product-btn');
             saveBtn.disabled = true;
-            saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>圖片上傳中...</span>';
+            saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>儲存中...</span>';
 
             const id = document.getElementById('edit-product-id').value;
             const name = document.getElementById('prod-name').value;
             const category = document.getElementById('prod-category').value;
 
-            const fileInput = document.getElementById('prod-images-file');
-            const files = fileInput.files;
+            // 解析 Google Drive 網址
+            const rawUrls = document.getElementById('prod-drive-urls').value;
+            const newConvertedUrls = rawUrls.split(/[\n,\s]+/)
+                .map(url => convertDriveUrl(url))
+                .filter(url => url && url.length > 0);
 
-            let uploadedUrls = [...currentExistingImages];
+            let finalImages = [...currentExistingImages, ...newConvertedUrls];
 
             try {
-                if (files && files.length > 0) {
-                    for (let i = 0; i < files.length; i++) {
-                        const file = files[i];
-                        const fileName = Date.now() + '_' + Math.random().toString(36).substring(2, 8) + '_' + file.name;
-                        const storageRef = Storage.ref(storage, 'products/' + fileName);
-                        
-                        await Storage.uploadBytes(storageRef, file);
-                        const downloadUrl = await Storage.getDownloadURL(storageRef);
-                        uploadedUrls.push(downloadUrl);
-                    }
-                }
-
                 const rows = document.querySelectorAll('.variant-row');
                 if (rows.length === 0) {
                     alert('請至少新增一個規格！');
@@ -930,15 +942,16 @@
                     });
                 });
 
-                const productData = { name, category, images: uploadedUrls, variants };
+                const productData = { name, category, images: finalImages, variants };
 
                 if (id) await Firestore.updateDoc(Firestore.doc(db, "products", id), productData);
                 else await Firestore.addDoc(Firestore.collection(db, "products"), productData);
 
                 closeProductModal();
+                alert('商品與圖片設定成功儲存！');
             } catch (err) {
                 console.error("儲存商品失敗:", err);
-                alert("儲存商品或上傳圖片失敗，請確定 Firebase Storage 已在主控台啟用！");
+                alert("儲存商品發生錯誤，請稍後再試。");
             } finally {
                 saveBtn.disabled = false;
                 saveBtn.innerHTML = '<span>儲存商品</span>';

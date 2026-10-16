@@ -156,9 +156,12 @@
                 <div id="pagination-completed-orders" class="flex justify-between items-center bg-white p-3 rounded-2xl border border-stone-200/60 shadow-sm"></div>
             </div>
 
-            <!-- 區塊 B：商品管理 (含搜尋、篩選、批次操作與分頁) -->
+            <!-- 區塊 B：商品管理 (含缺貨提醒、搜尋、篩選、批次與分頁) -->
             <div id="admin-section-products" class="hidden space-y-4">
                 
+                <!-- 庫存為 0 的頂部警告欄容器 -->
+                <div id="stock-alert-container"></div>
+
                 <!-- 搜尋與篩選工具列 -->
                 <div class="bg-white p-4 rounded-2xl shadow-sm border border-stone-200/60 space-y-3">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
@@ -816,7 +819,28 @@
             filterSelect.innerHTML = '<option value="ALL">全部分類</option>' + catOptions;
         }
 
-        /* --- 核心：商品搜尋、過濾、分頁與批次控制邏輯 --- */
+        /* --- 核心：商品搜尋、過濾、缺貨警示、分頁與批次控制邏輯 --- */
+        if (!window.expandedProdVariants) {
+            window.expandedProdVariants = new Set();
+        }
+
+        window.showOnlyOutOFStock = false;
+
+        window.toggleVariantsExpand = function(prodId) {
+            if (window.expandedProdVariants.has(prodId)) {
+                window.expandedProdVariants.delete(prodId);
+            } else {
+                window.expandedProdVariants.add(prodId);
+            }
+            renderAdminProducts();
+        };
+
+        window.toggleOutOfStockFilter = function() {
+            window.showOnlyOutOFStock = !window.showOnlyOutOFStock;
+            productsCurrentPage = 1;
+            renderAdminProducts();
+        };
+
         window.onProductSearchChange = function() {
             productsCurrentPage = 1;
             renderAdminProducts();
@@ -884,7 +908,7 @@
                         category: source.category || '',
                         images: source.images ? [...source.images] : [],
                         variants: source.variants ? JSON.parse(JSON.stringify(source.variants)) : [],
-                        active: false // 預設新複製的商品為下架，避免重複展示
+                        active: false
                     };
                     await Firestore.addDoc(Firestore.collection(db, "products"), newProdData);
                     alert('已成功複製商品【' + newProdData.name + '】！');
@@ -899,11 +923,41 @@
             const tbody = document.getElementById('admin-products-tbody');
             const paginationContainer = document.getElementById('pagination-products');
 
-            // 1. 套用關鍵字、分類與狀態篩選
             const searchKw = document.getElementById('prod-search-input')?.value.trim().toLowerCase() || '';
             const catFilter = document.getElementById('prod-category-filter')?.value || 'ALL';
             const statusFilter = document.getElementById('prod-status-filter')?.value || 'ALL';
 
+            // 1. 找出所有含有「庫存等於 0」規格的商品
+            const outOfStockProducts = products.filter(p => 
+                p.variants && p.variants.some(v => Number(v.stock) === 0)
+            );
+
+            // 2. 動態渲染頂部「庫存為 0 警示欄」
+            let alertBannerHtml = '';
+            if (outOfStockProducts.length > 0) {
+                alertBannerHtml = '<div class="bg-rose-50 border border-rose-200 p-3 rounded-xl flex items-center justify-between text-xs text-rose-800 font-bold mb-3 shadow-sm">' +
+                    '<div class="flex items-center gap-2">' +
+                        '<i class="fa-solid fa-triangle-exclamation text-rose-500 text-sm animate-bounce"></i>' +
+                        '<span>警告：目前共有 <strong class="text-rose-600 font-black text-sm underline">' + outOfStockProducts.length + '</strong> 項商品含有缺貨（庫存為 0）的規格！</span>' +
+                    '</div>' +
+                    '<button type="button" onclick="window.toggleOutOfStockFilter()" class="px-3 py-1.5 rounded-lg border transition cursor-pointer font-bold text-xs ' + 
+                        (window.showOnlyOutOFStock ? 'bg-rose-600 text-white border-rose-600' : 'bg-white text-rose-700 border-rose-200 hover:bg-rose-100') + '">' +
+                        (window.showOnlyOutOFStock ? '<i class="fa-solid fa-xmark"></i> 清除缺貨篩選' : '<i class="fa-solid fa-filter"></i> 一鍵只看缺貨商品') +
+                    '</button>' +
+                '</div>';
+            } else {
+                alertBannerHtml = '<div class="bg-emerald-50 border border-emerald-200 p-2.5 rounded-xl flex items-center gap-2 text-xs text-emerald-800 font-bold mb-3">' +
+                    '<i class="fa-solid fa-circle-check text-emerald-600"></i>' +
+                    '<span>所有商品規格庫存充裕，目前無缺貨商品。</span>' +
+                '</div>';
+            }
+
+            const alertContainer = document.getElementById('stock-alert-container');
+            if (alertContainer) {
+                alertContainer.innerHTML = alertBannerHtml;
+            }
+
+            // 3. 多重條件過濾
             let filtered = products.filter(p => {
                 const matchKw = !searchKw || p.name.toLowerCase().includes(searchKw);
                 const matchCat = catFilter === 'ALL' || p.category === catFilter;
@@ -911,7 +965,12 @@
                 if (statusFilter === 'active') matchStatus = p.active !== false;
                 if (statusFilter === 'inactive') matchStatus = p.active === false;
 
-                return matchKw && matchCat && matchStatus;
+                let matchStock = true;
+                if (window.showOnlyOutOFStock) {
+                    matchStock = p.variants && p.variants.some(v => Number(v.stock) === 0);
+                }
+
+                return matchKw && matchCat && matchStatus && matchStock;
             });
 
             if (filtered.length === 0) {
@@ -920,7 +979,16 @@
                 return;
             }
 
-            // 2. 分頁計算
+            // 4. 【排序優化】：含有缺貨規格的商品排在最前
+            filtered.sort((a, b) => {
+                const aHasZero = a.variants && a.variants.some(v => Number(v.stock) === 0);
+                const bHasZero = b.variants && b.variants.some(v => Number(v.stock) === 0);
+                if (aHasZero && !bHasZero) return -1;
+                if (!aHasZero && bHasZero) return 1;
+                return 0;
+            });
+
+            // 5. 分頁計算
             const totalPages = Math.ceil(filtered.length / PROD_PAGE_SIZE);
             if (productsCurrentPage > totalPages) productsCurrentPage = totalPages;
 
@@ -931,29 +999,59 @@
                 const images = (p.images && p.images.length > 0) ? p.images : [FALLBACK_IMAGE];
                 const isActive = p.active !== false;
 
-                return '<tr class="border-b border-stone-100 hover:bg-[#FAF8F5]/60 transition-colors">' +
+                // 庫存為 0 的規格排在最前
+                const sortedVariants = [...p.variants].sort((a, b) => (Number(a.stock) === 0 ? -1 : 1));
+
+                const totalStock = p.variants.reduce((sum, v) => sum + (Number(v.stock) || 0), 0);
+                const isExpanded = window.expandedProdVariants.has(p.id);
+                
+                const maxVisible = 3;
+                const hasMore = sortedVariants.length > maxVisible;
+                const displayVariants = (hasMore && !isExpanded) ? sortedVariants.slice(0, maxVisible) : sortedVariants;
+
+                const hasZeroStock = p.variants.some(v => Number(v.stock) === 0);
+
+                return '<tr class="border-b border-stone-100 hover:bg-[#FAF8F5]/60 transition-colors ' + (hasZeroStock ? 'bg-rose-50/20' : '') + '">' +
                     '<td class="p-3.5 text-center"><input type="checkbox" value="' + p.id + '" class="product-checkbox rounded cursor-pointer"></td>' +
                     '<td class="p-3.5">' +
                         '<div class="flex items-center gap-1 overflow-x-auto max-w-[130px] no-scrollbar">' +
                             images.map(img => '<img src="' + img + '" class="w-10 h-10 rounded-lg object-cover bg-stone-100 flex-shrink-0 border border-stone-200/60">').join('') +
                         '</div>' +
                     '</td>' +
-                    '<td class="p-3.5 font-bold text-stone-800">' + p.name + '</td>' +
-                    '<td class="p-3.5"><span class="text-xs bg-[#FAF2F3] text-[#A85568] font-bold px-2.5 py-1 rounded-md">' + (p.category || '未分類') + '</span></td>' +
-                    '<td class="p-3.5">' +
+                    '<td class="p-3.5 font-bold text-stone-800 max-w-[200px]">' + 
+                        p.name + 
+                        (hasZeroStock ? '<span class="ml-1.5 inline-block text-[10px] bg-rose-100 text-rose-700 font-bold px-1.5 py-0.5 rounded border border-rose-200">有缺貨規格</span>' : '') +
+                    '</td>' +
+                    '<td class="p-3.5"><span class="text-xs bg-[#FAF2F3] text-[#A85568] font-bold px-2.5 py-1 rounded-md whitespace-nowrap">' + (p.category || '未分類') + '</span></td>' +
+                    '<td class="p-3.5 whitespace-nowrap">' +
                         (isActive ? 
                             '<span class="text-[11px] bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold px-2 py-0.5 rounded-full"><i class="fa-solid fa-eye"></i> 上架中</span>' :
                             '<span class="text-[11px] bg-stone-100 text-stone-500 border border-stone-200 font-bold px-2 py-0.5 rounded-full"><i class="fa-solid fa-eye-slash"></i> 已下架</span>'
                         ) +
                     '</td>' +
-                    '<td class="p-3.5">' +
+                    '<td class="p-3.5 min-w-[280px]">' +
                         '<div class="space-y-1">' +
-                            p.variants.map(v => 
-                                '<div class="text-xs bg-[#FAF8F5] p-1.5 rounded-lg border border-stone-200/60 flex items-center justify-between gap-2">' +
-                                    '<span class="font-bold text-stone-700">' + v.name + '</span>' +
-                                    '<span class="text-stone-500">日幣:¥' + (v.costJPY || 0) + ' / 售價:NT$' + v.price + ' / <strong class="text-[#A85568]">庫存:' + v.stock + '</strong></span>' +
-                                '</div>'
-                            ).join('') +
+                            displayVariants.map(v => {
+                                const isZero = Number(v.stock) === 0;
+                                return '<div class="text-xs p-1.5 rounded-lg border flex items-center justify-between gap-2 ' + 
+                                    (isZero ? 'bg-rose-100/80 border-rose-200 text-rose-900 font-bold' : 'bg-[#FAF8F5] border-stone-200/60 text-stone-700') + '">' +
+                                    '<span class="font-bold flex items-center gap-1">' +
+                                        (isZero ? '<i class="fa-solid fa-circle-exclamation text-rose-600"></i>' : '') +
+                                        v.name +
+                                    '</span>' +
+                                    '<span>日幣:¥' + (v.costJPY || 0) + ' / 售價:NT$' + v.price + ' / ' +
+                                        (isZero ? '<strong class="text-rose-600 underline">庫存:0 (缺貨)</strong>' : '<strong class="text-[#A85568]">庫存:' + v.stock + '</strong>') +
+                                    '</span>' +
+                                '</div>';
+                            }).join('') +
+                            (hasMore ? 
+                                '<button type="button" onclick="window.toggleVariantsExpand(\'' + p.id + '\')" class="w-full mt-1 py-1 text-[11px] text-[#A85568] hover:text-[#8E4455] font-bold bg-[#FAF2F3] hover:bg-rose-100 rounded-lg transition cursor-pointer border border-rose-100 flex items-center justify-center gap-1">' +
+                                    (isExpanded ? 
+                                        '<i class="fa-solid fa-chevron-up"></i> 收起多餘規格' : 
+                                        '<i class="fa-solid fa-chevron-down"></i> 展開其餘 ' + (sortedVariants.length - maxVisible) + ' 個規格 (總庫存: ' + totalStock + ')'
+                                    ) +
+                                '</button>' : ''
+                            ) +
                         '</div>' +
                     '</td>' +
                     '<td class="p-3.5 text-center space-x-1.5 whitespace-nowrap">' +
@@ -964,7 +1062,6 @@
                 '</tr>';
             }).join('');
 
-            // 分頁按鈕渲染
             let pageBtnsHtml = '';
             for (let i = 1; i <= totalPages; i++) {
                 const isCurr = i === productsCurrentPage;

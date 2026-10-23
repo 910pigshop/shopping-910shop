@@ -156,26 +156,21 @@
                 <div id="pagination-completed-orders" class="flex justify-between items-center bg-white p-3 rounded-2xl border border-stone-200/60 shadow-sm"></div>
             </div>
 
-            <!-- 區塊 B：商品管理 (含缺貨提醒、搜尋、篩選、批次與分頁) -->
+            <!-- 區塊 B：商品管理 -->
             <div id="admin-section-products" class="hidden space-y-4">
                 
-                <!-- 庫存為 0 的頂部警告欄容器 -->
                 <div id="stock-alert-container"></div>
 
-                <!-- 搜尋與篩選工具列 -->
                 <div class="bg-white p-4 rounded-2xl shadow-sm border border-stone-200/60 space-y-3">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
                         <div class="flex items-center gap-2 flex-wrap w-full md:w-auto">
-                            <!-- 關鍵字搜尋框 -->
                             <div class="relative flex-grow sm:flex-grow-0 sm:w-64">
                                 <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-stone-400 text-xs"></i>
                                 <input type="text" id="prod-search-input" oninput="onProductSearchChange()" placeholder="搜尋商品名稱..." class="w-full pl-8 pr-3 py-1.5 border border-stone-200 rounded-xl text-xs bg-[#FAF8F5] focus:ring-1 focus:ring-[#A85568] focus:outline-none text-stone-800">
                             </div>
-                            <!-- 分類篩選下拉選單 -->
                             <select id="prod-category-filter" onchange="onProductSearchChange()" class="px-3 py-1.5 border border-stone-200 rounded-xl text-xs bg-[#FAF8F5] font-bold text-stone-700 focus:ring-1 focus:ring-[#A85568] focus:outline-none">
                                 <option value="ALL">全部分類</option>
                             </select>
-                            <!-- 狀態過濾 (上架中/已下架) -->
                             <select id="prod-status-filter" onchange="onProductSearchChange()" class="px-3 py-1.5 border border-stone-200 rounded-xl text-xs bg-[#FAF8F5] font-bold text-stone-700 focus:ring-1 focus:ring-[#A85568] focus:outline-none">
                                 <option value="ALL">全部狀態</option>
                                 <option value="active">上架中</option>
@@ -188,7 +183,6 @@
                         </button>
                     </div>
 
-                    <!-- 批次操作工具欄 -->
                     <div class="bg-[#FAF2F3] p-3 rounded-xl border border-rose-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                         <div class="flex items-center gap-2 text-xs text-[#7D3B4A] font-bold">
                             <i class="fa-solid fa-list-check"></i>
@@ -208,14 +202,13 @@
                     </div>
                 </div>
 
-                <!-- 商品列表表格 -->
                 <div class="bg-white rounded-2xl shadow-sm border border-stone-200/60 overflow-x-auto">
                     <table class="w-full text-left border-collapse text-sm">
                         <thead>
                             <tr class="bg-[#FAF8F5] text-stone-600 border-b border-stone-200/80 text-xs font-bold">
                                 <th class="p-3.5 w-10 text-center"><input type="checkbox" id="select-all-products" onclick="toggleSelectAllProducts(this)" class="rounded cursor-pointer"></th>
                                 <th class="p-3.5">圖片</th>
-                                <th class="p-3.5">商品名稱</th>
+                                <th class="p-3.5">商品名稱 / 說明</th>
                                 <th class="p-3.5">分類</th>
                                 <th class="p-3.5">狀態</th>
                                 <th class="p-3.5">規格 / 日幣成本 / 售價 / 庫存</th>
@@ -226,7 +219,6 @@
                     </table>
                 </div>
 
-                <!-- 商品分頁控制頁尾 -->
                 <div id="pagination-products" class="flex justify-between items-center bg-white p-3 rounded-2xl border border-stone-200/60 shadow-sm"></div>
             </div>
 
@@ -290,6 +282,13 @@
                     <label class="block text-xs font-bold text-stone-600 mb-1">商品名稱</label>
                     <input type="text" id="prod-name" required class="w-full px-3 py-2 border border-stone-200 rounded-xl focus:ring-1 focus:ring-[#A85568] focus:outline-none text-xs bg-[#FAF8F5]">
                 </div>
+
+                <!-- 【新增】商品說明 (可選擇填寫或不填) -->
+                <div>
+                    <label class="block text-xs font-bold text-stone-600 mb-1">商品說明 / 備註 <span class="text-stone-400 font-normal">(選填)</span></label>
+                    <textarea id="prod-description" rows="3" placeholder="例如：材質100%純棉、日本連線限定、尺寸量測建議等..." class="w-full px-3 py-2 border border-stone-200 rounded-xl focus:ring-1 focus:ring-[#A85568] focus:outline-none text-xs bg-[#FAF8F5] text-stone-700"></textarea>
+                </div>
+
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-bold text-stone-600 mb-1">商品分類</label>
@@ -306,7 +305,6 @@
                     </div>
                 </div>
 
-                <!-- Google Drive 圖片連結輸入區塊 -->
                 <div class="border-t border-stone-100 pt-3 space-y-3">
                     <label class="block text-xs font-bold text-stone-800"><i class="fa-brands fa-google-drive text-emerald-600"></i> Google Drive 照片連結</label>
                     <div id="existing-images-preview" class="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar hidden"></div>
@@ -818,7 +816,6 @@
             filterSelect.innerHTML = '<option value="ALL">全部分類</option>' + catOptions;
         }
 
-        /* --- 核心：商品搜尋、過濾、缺貨警示、分頁與批次控制邏輯 --- */
         if (!window.expandedProdVariants) {
             window.expandedProdVariants = new Set();
         }
@@ -904,6 +901,7 @@
                 try {
                     const newProdData = {
                         name: source.name + ' (副本)',
+                        description: source.description || '',
                         category: source.category || '',
                         images: source.images ? [...source.images] : [],
                         variants: source.variants ? JSON.parse(JSON.stringify(source.variants)) : [],
@@ -1011,9 +1009,11 @@
                             images.map(img => '<img src="' + img + '" class="w-10 h-10 rounded-lg object-cover bg-stone-100 flex-shrink-0 border border-stone-200/60">').join('') +
                         '</div>' +
                     '</td>' +
-                    '<td class="p-3.5 font-bold text-stone-800 max-w-[200px]">' + 
-                        p.name + 
-                        (hasZeroStock ? '<span class="ml-1.5 inline-block text-[10px] bg-rose-100 text-rose-700 font-bold px-1.5 py-0.5 rounded border border-rose-200">有缺貨規格</span>' : '') +
+                    '<td class="p-3.5 max-w-[200px]">' + 
+                        '<div class="font-bold text-stone-800">' + p.name + 
+                            (hasZeroStock ? '<span class="ml-1.5 inline-block text-[10px] bg-rose-100 text-rose-700 font-bold px-1.5 py-0.5 rounded border border-rose-200">缺貨</span>' : '') +
+                        '</div>' +
+                        (p.description ? '<div class="text-[11px] text-stone-400 mt-1 line-clamp-2">' + p.description + '</div>' : '') +
                     '</td>' +
                     '<td class="p-3.5"><span class="text-xs bg-[#FAF2F3] text-[#A85568] font-bold px-2.5 py-1 rounded-md whitespace-nowrap">' + (p.category || '未分類') + '</span></td>' +
                     '<td class="p-3.5 whitespace-nowrap">' +
@@ -1130,7 +1130,6 @@
             container.appendChild(div);
         };
 
-        // 移動圖片順序（-1 往左，1 往右）
         window.moveExistingImage = function(index, dir) {
             const newIndex = index + dir;
             if (newIndex < 0 || newIndex >= currentExistingImages.length) return;
@@ -1184,6 +1183,7 @@
                 const p = products.find(item => item.id === id);
                 document.getElementById('edit-product-id').value = p.id;
                 document.getElementById('prod-name').value = p.name;
+                document.getElementById('prod-description').value = p.description || '';
                 document.getElementById('prod-category').value = p.category || '';
                 document.getElementById('prod-active').value = (p.active !== false).toString();
 
@@ -1218,6 +1218,7 @@
 
             const id = document.getElementById('edit-product-id').value;
             const name = document.getElementById('prod-name').value;
+            const description = document.getElementById('prod-description').value.trim();
             const category = document.getElementById('prod-category').value;
             const active = document.getElementById('prod-active').value === 'true';
 
@@ -1247,7 +1248,7 @@
                     });
                 });
 
-                const productData = { name, category, images: finalImages, variants, active };
+                const productData = { name, description, category, images: finalImages, variants, active };
 
                 if (id) await Firestore.updateDoc(Firestore.doc(db, "products", id), productData);
                 else await Firestore.addDoc(Firestore.collection(db, "products"), productData);
